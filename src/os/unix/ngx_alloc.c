@@ -69,6 +69,9 @@ ngx_memalign(size_t alignment, size_t size, ngx_log_t *log)
 }
 
 #elif (NGX_HAVE_MEMALIGN)
+#ifdef __CHERI_PURE_CAPABILITY__
+#error should be using posix_memalign
+#endif
 
 void *
 ngx_memalign(size_t alignment, size_t size, ngx_log_t *log)
