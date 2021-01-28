@@ -69,6 +69,11 @@ ngx_array_push(ngx_array_t *a)
 
             p->d.last += a->size;
             a->nalloc++;
+#ifdef __CHERI_PURE_CAPABILITY__
+            a->elts = cheri_setboundsexact(
+                cheri_setaddress(p->d.last, (long)a->elts),
+                a->nalloc * a->size);
+#endif
 
         } else {
             /* allocate a new array */
@@ -117,6 +122,11 @@ ngx_array_push_n(ngx_array_t *a, ngx_uint_t n)
 
             p->d.last += size;
             a->nalloc += n;
+#ifdef __CHERI_PURE_CAPABILITY__
+            a->elts = cheri_setboundsexact(
+                cheri_setaddress(p->d.last, (long)a->elts),
+                a->nalloc * a->size);
+#endif
 
         } else {
             /* allocate a new array */
