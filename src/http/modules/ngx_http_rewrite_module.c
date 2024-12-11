@@ -629,7 +629,7 @@ ngx_http_rewrite_if(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     if (elts != lcf->codes->elts) {
         if_code = (ngx_http_script_if_code_t *)
-                   ((u_char *) if_code + ((u_char *) lcf->codes->elts - elts));
+                   ((u_char *) lcf->codes->elts + ((u_char *) if_code - elts));
     }
 
     if_code->next = (u_char *) lcf->codes->elts + lcf->codes->nelts
