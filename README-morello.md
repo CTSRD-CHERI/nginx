@@ -1,6 +1,6 @@
 # Background
 
-This software is an experimental Morello port of nginx v1.22.0.
+This software is an experimental Morello port of nginx v1.24.0.
 
 ## Build instructions
 
@@ -13,11 +13,11 @@ Once installed nginx can be built as follows
 (see `auto/configure --help` for a complete list of options):
  
 ```
-$ auto/configure
-	--with-cc-opt='-Wno-cheri-provenance'
-	--without-http_geo_module
-	--with-http_ssl_module
-	--with-pcre
+$ auto/configure \
+	--with-cc-opt='-Wno-cheri-provenance' \
+	--without-http_geo_module \
+	--with-http_ssl_module \
+	--with-pcre \
 	--with-compat
 $ gmake
 $ sudo gmake install
@@ -27,7 +27,7 @@ $ sudo gmake install
 
 Once installed nginx can be started by specifying a configuration file as:
  
-`sudo /usr/local/sbin/nginx -c <conf>`
+`sudo /usr/local/nginx/sbin/nginx -c <conf>`
 
 To stop the server:
 
@@ -40,52 +40,13 @@ file can be found,
 
 ## Library compartmentalization
 
-When using Library compartmentalisation nginx must be build with the 
-following flags: `-Xclang -morello-bounded-memargs=caller-only`.
+Library compartmentalisation can be enabled for nginx following the
+instructions given in `man c18n`.  For example:
 
-Following the instructions given by in `man c18n` the runtime linker can either
-be changed to support library compartmentalisation when running configure:
-
-`$ auto/configure --with-ld-opt="-Wl,--dynamic-linker=/libexec/ld-elf-c18n.so.1"` 
-
-or can be changed after the nginx binary has been created using patchelf:
-
-```
-$ sudo patchelf --set-interpreter /libexec/ld-elf-c18n.so.1  /usr/local/sbin/nginx
-```
-
-The change of runtime linker can be verified with either readelf or patchelf
-as below:
-
-```
-$ readelf -l /usr/local/nginx/sbin/nginx
-
-Elf file type is DYN (Shared object file)
-Entry point 0x6ae01
-There are 11 program headers, starting at offset 64
-
-Program Headers:
-  Type           Offset             VirtAddr           PhysAddr
-                 FileSiz            MemSiz              Flg    Align
-  PHDR           0x0000000000000040 0x0000000000000040 0x0000000000000040
-                 0x0000000000000268 0x0000000000000268  R      0x8
-  INTERP         0x0000000000000400 0x0000000000000400 0x0000000000000400
-                 0x0000000000000015 0x0000000000000015  R      0x1
-      [Requesting program interpreter: /libexec/ld-elf.so.1]
-...
-
-$ patchelf --print-interpreter /usr/local/sbin/nginx
-/libexec/ld-elf-c18n.so.1
-```
-
-To start nginx the modifed runtime linker must be able to locate the following
-library: `libpcre.so.1`. This can be achieved by specifying the environmental
-variable `LD_C18N_LIBRARY_PATH` as follows:
-
-`$ sudo LD_C18N_LIBRARY_PATH=/usr/local/lib /usr/local/nginx/sbin/nginx -c ...`
+`sudo env LD_COMPARTMENT_ENABLE=yes /usr/local/nginx/sbin/nginx -c ...`
 
 nginx should then start running with shared libraries within seperate
-compartmentments (manged and enforced by the updated runtime linker).
+compartmentments.
 
 ## Testing
 
@@ -131,10 +92,10 @@ Result: PASS
 NOTE: That the `http_header_buffers.t` script requires increasing the
 connection pool size to 224.
 
-To run the unit tests with the runtime linker for library compartmentalisation
-include the `LD_C18N_LIBRARY_PATH` environmental variable:
+To run the unit tests with library compartmentalisation
+include the `LD_COMPARTMENT_ENABLE` environmental variable:
 
-`LD_C18N_LIBRARY_PATH=/usr/local/lib TEST_NGINX_BINARY=/usr/local/nginx/sbin/nginx prove http*`
+`LD_COMPARTMENT_ENABLE=yes TEST_NGINX_BINARY=/usr/local/nginx/sbin/nginx prove http*`
 
 ### Performance testing
 
@@ -145,11 +106,11 @@ in [Testing the Performance of NGINX and NGINX Plus Web Servers](https://www.ngi
 
 ## Notes and Limitations
 
-As which many configure scripts, `-Werror` is enabled. This results in many
-ambiguous provenance warnings which (in theses cases) bening being promoted
-to errors. As in this case the warnings are benign instead of making
-disruptive and disruptive changes to the code the configure should be
-passed the `--with-cc-opt='-Wno-cheri-provenenace` flags.
+As with many configure scripts, `-Werror` is enabled. This results in many
+ambiguous provenance warnings which (in theses cases) are being promoted
+to errors. As these warnings are benign and the changes to the code to quiet
+them would be disruptive, the warning should be disabled by passing
+`--with-cc-opt='-Wno-cheri-provenenace` to configure.
 
 The `http_geo_module` performs a cast of a pointer difference to a pointer.
 This results in a capability misuse as the resulting pointer can't be
@@ -166,7 +127,7 @@ identify problems previously only found during dynamic testing. However,
  we are still greatly reliant on dynamic testing. This testing is
 constrained by both the completeness of the test suites (which in some
 cases provide poor coverage) and the time available within the project
-to perform testing. Whilst it is know that errors remain outside the
+to perform testing. Whilst it is known that errors remain outside the
 core http module we are not able to estimate what problems might
 remain beyond those resolved in the scope of the project.
 
