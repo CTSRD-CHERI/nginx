@@ -91,11 +91,13 @@ case "$NGX_MACHINE" in
     i386 | i686 | i86pc)
         have=NGX_HAVE_NONALIGNED . auto/have
         NGX_MACH_CACHE_LINE=32
+	echo FOUND_i386
     ;;
 
     amd64 | x86_64)
         have=NGX_HAVE_NONALIGNED . auto/have
         NGX_MACH_CACHE_LINE=64
+	echo FOUND_x86
     ;;
 
     sun4u | sun4v | sparc | sparc64)
@@ -113,6 +115,12 @@ case "$NGX_MACHINE" in
     aarch64 | arm64)
         have=NGX_ALIGNMENT value=16 . auto/define
         NGX_MACH_CACHE_LINE=64
+    ;;
+
+    riscv | riscv64)
+        have=NGX_ALIGNMENT value=16 . auto/define
+        NGX_MACH_CACHE_LINE=64
+	echo MACHINE_FOUND
     ;;
 
     *)

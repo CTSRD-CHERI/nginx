@@ -716,33 +716,36 @@ ngx_feature_test="char *p; p = strerrordesc_np(0);
                   if (p == NULL) return 1"
 . auto/feature
 
+if test -n "$NGX_CROSSCOMPILING"; then
+    cat << END >> $NGX_AUTO_CONFIG_H
 
-if [ $ngx_found = no ]; then
+#ifndef NGX_SYS_NERR
+#define NGX_SYS_NERR  sys_nerr
+#endif
 
+END
+else
     ngx_feature="sys_nerr"
     ngx_feature_name="NGX_SYS_NERR"
     ngx_feature_run=value
     ngx_feature_incs='#include <errno.h>
-                      #include <stdio.h>'
+		      #include <stdio.h>'
     ngx_feature_path=
     ngx_feature_libs=
     ngx_feature_test='printf("%d", sys_nerr);'
     . auto/feature
-fi
 
-
-if [ $ngx_found = no ]; then
-
-    # Cygiwn defines _sys_nerr
-    ngx_feature="_sys_nerr"
-    ngx_feature_name="NGX_SYS_NERR"
-    ngx_feature_run=value
-    ngx_feature_incs='#include <errno.h>
-                      #include <stdio.h>'
-    ngx_feature_path=
-    ngx_feature_libs=
-    ngx_feature_test='printf("%d", _sys_nerr);'
-    . auto/feature
+  if [ $ngx_found = no ]; then
+        ngx_feature="_sys_nerr"
+        ngx_feature_name="NGX_SYS_NERR"
+        ngx_feature_run=value
+        ngx_feature_incs='#include <errno.h>
+		          #include <stdio.h>'
+        ngx_feature_path=
+        ngx_feature_libs=
+        ngx_feature_test='printf("%d", _sys_nerr);'
+        . auto/feature
+  fi
 fi
 
 

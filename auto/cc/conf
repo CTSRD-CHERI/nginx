@@ -183,6 +183,11 @@ if [ "$NGX_PLATFORM" != win32 ]; then
     else
         ngx_feature="gcc builtin atomic operations"
         ngx_feature_name=NGX_HAVE_GCC_ATOMIC
+        if test -n "$NGX_CROSSCOMPILING"; then
+            ngx_feature_run=no
+        else
+            ngx_feature_run=yes
+        fi
         ngx_feature_run=yes
         ngx_feature_incs=
         ngx_feature_path=

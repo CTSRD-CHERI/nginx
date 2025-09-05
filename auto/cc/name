@@ -14,12 +14,12 @@ if [ "$NGX_PLATFORM" != win32 ]; then
     ngx_feature_test=
     . auto/feature
 
-    if [ $ngx_found = no ]; then
-        echo
-        echo $0: error: C compiler $CC is not found
-        echo
-        exit 1
-    fi
+#    if [ $ngx_found = no ]; then
+#        echo
+#        echo $0: error: C compiler $CC is not found
+#        echo
+#        exit 1
+#    fi
 
 fi
 
