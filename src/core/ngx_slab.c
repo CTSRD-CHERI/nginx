@@ -129,7 +129,7 @@ ngx_slab_init(ngx_slab_pool_t *pool)
     p += n * sizeof(ngx_slab_page_t);
 
 #if __has_feature(capabilities)
-    pool->stats = (ngx_slab_stat_t *) cheri_setbounds(
+    pool->stats = (ngx_slab_stat_t *) cheri_bounds_set(
         p, n * sizeof(ngx_slab_stat_t));
 #else
     pool->stats = (ngx_slab_stat_t *) p;
@@ -143,7 +143,7 @@ ngx_slab_init(ngx_slab_pool_t *pool)
     pages = (ngx_uint_t) (size / (ngx_pagesize + sizeof(ngx_slab_page_t)));
 
 #if __has_feature(capabilities)
-    pool->pages = (ngx_slab_page_t *) cheri_setbounds(p, pages * sizeof(ngx_slab_page_t));
+    pool->pages = (ngx_slab_page_t *) cheri_bounds_set(p, pages * sizeof(ngx_slab_page_t));
 #else
     pool->pages = (ngx_slab_page_t *) p;
 #endif
