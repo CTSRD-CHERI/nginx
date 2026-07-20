@@ -4,7 +4,6 @@
  * Copyright (C) Nginx, Inc.
  */
 
-#include <cheri/cheric.h>
 #include <ngx_config.h>
 #include <ngx_core.h>
 
