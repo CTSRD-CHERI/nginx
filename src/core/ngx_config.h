@@ -156,12 +156,5 @@ typedef uintptr_t	ngx_ptraddr_t;
 
 #endif
 
-/* XXXAR: For the low pointer bits macros */
-#if __has_include(<cheri/cheric.h>)
-#include <cheri/cheric.h>
-#else
-#include <cheri.h>
-#endif
-
 
 #endif /* _NGX_CONFIG_H_INCLUDED_ */

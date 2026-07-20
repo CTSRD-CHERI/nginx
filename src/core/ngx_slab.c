@@ -48,10 +48,10 @@
 #define ngx_slab_slots(pool)                                        \
     (ngx_slab_page_t *) ((u_char *) (pool) + sizeof(ngx_slab_pool_t))
 
-#define ngx_slab_page_type(page)   cheri_get_low_ptr_bits((page)->prev, NGX_SLAB_PAGE_MASK)
+#define ngx_slab_page_type(page)   ((page)->prev & NGX_SLAB_PAGE_MASK)
 
 #define ngx_slab_page_prev(page)                                              \
-    (ngx_slab_page_t *) cheri_clear_low_ptr_bits((page)->prev, NGX_SLAB_PAGE_MASK)
+    (ngx_slab_page_t *) ((page)->prev & ~NGX_SLAB_PAGE_MASK)
 
 #define ngx_slab_page_addr(pool, page)                                        \
     ((((page) - (pool)->pages) << ngx_pagesize_shift)                         \
