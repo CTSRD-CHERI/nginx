@@ -878,7 +878,7 @@ ngx_http_script_copy_code(ngx_http_script_engine_t *e)
     }
 
     e->ip += sizeof(ngx_http_script_copy_code_t)
-          + __builtin_align_up(code->len, sizeof(uintptr_t));
+          + ((code->len + sizeof(uintptr_t) - 1) & ~(sizeof(uintptr_t) - 1));
 
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0,
                    "http script copy: \"%*s\"", e->pos - p, p);

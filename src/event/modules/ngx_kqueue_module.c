@@ -345,8 +345,8 @@ ngx_kqueue_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
     ev->disabled = 0;
 
     if (ev->index < nchanges
-        && (cheri_clear_low_ptr_bits((uintptr_t) change_list[ev->index].udata, 1)
-            == (uintptr_t) ev))
+        && ((uintptr_t) change_list[ev->index].udata & (uintptr_t) ~1)
+            == (uintptr_t) ev)
     {
         ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
                        "kevent deleted: %d: ft:%i",
@@ -358,7 +358,7 @@ ngx_kqueue_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 
         if (ev->index < nchanges) {
             e = (ngx_event_t *)
-                    cheri_clear_low_ptr_bits((uintptr_t) change_list[nchanges].udata, 1);
+                    ((uintptr_t) change_list[nchanges].udata & (uintptr_t) ~1);
             change_list[ev->index] = change_list[nchanges];
             e->index = ev->index;
         }
@@ -600,8 +600,8 @@ ngx_kqueue_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
         case EVFILT_READ:
         case EVFILT_WRITE:
 
-            instance = cheri_get_low_ptr_bits((uintptr_t) ev, 1);
-            ev = (ngx_event_t *) cheri_clear_low_ptr_bits((uintptr_t) ev, 1);
+            instance = (uintptr_t) ev & 1;
+            ev = (ngx_event_t *) ((uintptr_t) ev & (uintptr_t) ~1);
 
             if (ev->closed || ev->instance != instance) {
 

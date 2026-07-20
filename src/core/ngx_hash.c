@@ -98,21 +98,22 @@ ngx_hash_find_wc_head(ngx_hash_wildcard_t *hwc, u_char *name, size_t len)
          *     11 - value is pointer to wildcard hash allowing
          *          "*.example.com" only.
          */
-        if (cheri_get_low_ptr_bits((uintptr_t) value, 2)) {
+        if ((uintptr_t) value & 2) {
 
             if (n == 0) {
 
                 /* "example.com" */
 
-                if (cheri_get_low_ptr_bits((uintptr_t) value, 1)) {
+                if ((uintptr_t) value & 1) {
                     return NULL;
                 }
 
-                hwc = (ngx_hash_wildcard_t *)cheri_clear_low_ptr_bits((uintptr_t)value, 3);
+                hwc = (ngx_hash_wildcard_t *)
+                                          ((uintptr_t) value & (uintptr_t) ~3);
                 return hwc->value;
             }
 
-            hwc = (ngx_hash_wildcard_t *) cheri_clear_low_ptr_bits((uintptr_t)value, 3);
+            hwc = (ngx_hash_wildcard_t *) ((uintptr_t) value & (uintptr_t) ~3);
 
             value = ngx_hash_find_wc_head(hwc, name, n - 1);
 
@@ -123,7 +124,7 @@ ngx_hash_find_wc_head(ngx_hash_wildcard_t *hwc, u_char *name, size_t len)
             return hwc->value;
         }
 
-        if (cheri_get_low_ptr_bits((uintptr_t) value, 1)) {
+        if ((uintptr_t) value & 1) {
 
             if (n == 0) {
 
@@ -132,7 +133,7 @@ ngx_hash_find_wc_head(ngx_hash_wildcard_t *hwc, u_char *name, size_t len)
                 return NULL;
             }
 
-            return (void *) cheri_clear_low_ptr_bits((uintptr_t)value, 3);
+            return (void *) ((uintptr_t) value & (uintptr_t) ~3);
         }
 
         return value;
@@ -184,11 +185,11 @@ ngx_hash_find_wc_tail(ngx_hash_wildcard_t *hwc, u_char *name, size_t len)
          *     11 - value is pointer to wildcard hash allowing "example.*".
          */
 
-        if (cheri_get_low_ptr_bits((uintptr_t) value, 2)) {
+        if ((uintptr_t) value & 2) {
 
             i++;
 
-            hwc = (ngx_hash_wildcard_t *) cheri_clear_low_ptr_bits((uintptr_t)value, 3);
+            hwc = (ngx_hash_wildcard_t *) ((uintptr_t) value & (uintptr_t) ~3);
 
             value = ngx_hash_find_wc_tail(hwc,
                 _ngx_aggressive_bounded_addressof(name[i], len - i), len - i);
